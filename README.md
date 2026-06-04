@@ -2,7 +2,7 @@
 minimalist terminal note editor — the TUI client of the ghostnote ecosystem.
 
 
-A minimalist, command-driven **terminal note editor** — part of the Ghostnote
+Command-driven **terminal note editor** — part of the Ghostnote
 ecosystem. Pure black background, a configurable accent color, and a `:` command
 system inspired by modal editors.
 
