@@ -10,14 +10,8 @@ All Ghostnote tools share the same notes, stored as plain JSON in
 `~/.ghostnote/notes/` (the `ghostnote/v1` format). A note made here appears in
 the Ghostnote CLI and web app, and vice versa.
 
-```
-╭─[ GHOSTNOTE ]──────────────────────── notes.md ─╮
-│                                                  │
-│  start typing...                                 │
-│                                                  │
-╰──────────────────────────────────────────────────╯
-[TYPE]  : commands   ^C quit
-```
+<img width="1124" height="589" alt="image" src="https://github.com/user-attachments/assets/6566d836-4f79-470e-9fd6-0a16344a4d8b" />
+
 
 ## Install
 
