@@ -41,6 +41,20 @@ go build -o ghostnote-tui .   # or: go install .
 Start typing — you're in **TYPE** mode. Press `:` to open the command bar, type
 a command, press Enter. `Esc` cancels the command bar.
 
+### Selection, copy, and paste
+
+GhostNote leaves mouse reporting disabled so the terminal keeps control of text
+selection. Drag to highlight text and use your terminal's normal copy action.
+Depending on the terminal, that is commonly `Ctrl+C` while text is selected,
+`Ctrl+Shift+C`, `Cmd+C`, or a context-menu command. When the terminal consumes
+the copy shortcut, GhostNote never receives it. If `Ctrl+C` reaches GhostNote
+without an active terminal selection, the existing quit binding is preserved.
+
+Paste with the terminal's normal shortcut. Bracketed paste is supported, and
+`Ctrl+V` is also handled directly in both the note editor and command bar when
+the terminal forwards that key. Common alternatives such as `Ctrl+Shift+V`,
+`Cmd+V`, middle-click, and context-menu paste continue to be terminal-defined.
+
 ### Note commands
 
 | Command | Description |
@@ -57,7 +71,7 @@ a command, press Enter. `Esc` cancels the command bar.
 | `:import [path]` | Import a `.ghostnote.json` file |
 | `:wipe` | Clear the editor (alias `:clear`) |
 | `:help` | Show the command summary |
-| `:quit` | Exit (aliases `:q`; also `Ctrl+C`) |
+| `:quit` | Exit (aliases `:q`; also `Ctrl+C` when the terminal does not consume it for copy) |
 
 ### Appearance commands
 

@@ -169,12 +169,12 @@ type noteMeta struct {
 }
 
 type note struct {
-	Schema  string         `json:"schema"`
-	ID      string         `json:"id"`
-	Name    string         `json:"name"`
-	Text    string         `json:"text"`
-	Drawing *string        `json:"drawing"` // web-only; preserved on round-trip
-	Meta    noteMeta       `json:"meta"`
+	Schema  string   `json:"schema"`
+	ID      string   `json:"id"`
+	Name    string   `json:"name"`
+	Text    string   `json:"text"`
+	Drawing *string  `json:"drawing"` // web-only; preserved on round-trip
+	Meta    noteMeta `json:"meta"`
 	Created int64    `json:"created"`
 	Updated int64    `json:"updated"`
 }
@@ -377,6 +377,10 @@ func initialModel() model {
 	ta.ShowLineNumbers = false
 	ta.CharLimit = 0
 	ta.Focus()
+	// Keep Ctrl+V as an application-level clipboard fallback. Terminals that
+	// handle paste themselves send the pasted text through bracketed paste;
+	// terminals that forward Ctrl+V let the textarea read the system clipboard.
+	ta.KeyMap.Paste.SetKeys("ctrl+v")
 	ta.FocusedStyle.Base = lipgloss.NewStyle()
 	ta.BlurredStyle.Base = lipgloss.NewStyle()
 	ta.FocusedStyle.CursorLine = lipgloss.NewStyle()
@@ -390,6 +394,7 @@ func initialModel() model {
 	ti.TextStyle = th.cmdStyle
 	ti.Cursor.Style = th.tiCursor
 	ti.CharLimit = 200
+	ti.KeyMap.Paste.SetKeys("ctrl+v")
 
 	return model{
 		area:    ta,
@@ -1006,6 +1011,7 @@ func (m model) statusBar(width int) string {
 	}
 	label := "[TYPE]"
 	help := th.statusDim.Render(":") + th.statusKey.Render(" commands") + "   " +
+		th.statusKey.Render("^V") + th.statusDim.Render(" paste") + "   " +
 		th.statusKey.Render("^C") + th.statusDim.Render(" quit")
 	if m.mode == modeList {
 		label = "[NOTES]"
@@ -1077,6 +1083,10 @@ func fmtDate(ts int64) string {
 // ---------- MAIN ----------
 
 func main() {
+	// Do not enable Bubble Tea mouse reporting here. Leaving mouse reporting off
+	// lets the terminal own drag-selection and its normal copy shortcuts.
+	// Bubble Tea enables bracketed paste by default, while the input components
+	// provide a Ctrl+V clipboard fallback when that key reaches the application.
 	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
 		fmt.Println("error:", err)
