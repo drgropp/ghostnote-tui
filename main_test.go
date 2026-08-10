@@ -1,6 +1,7 @@
 package main
 
 import (
+	"strings"
 	"testing"
 
 	tea "github.com/charmbracelet/bubbletea"
@@ -71,5 +72,28 @@ func TestCtrlCQuitBindingIsPreserved(t *testing.T) {
 	}
 	if cmd == nil {
 		t.Fatal("Ctrl+C no longer returns the quit command")
+	}
+}
+
+func TestScribeCommandStartsForCurrentNote(t *testing.T) {
+	m := initialModel()
+	m.area.SetValue("# Current note")
+
+	got, cmd := m.runCommand("scribe stats")
+	if cmd == nil {
+		t.Fatal("scribe command did not return asynchronous work")
+	}
+	if !strings.Contains(got.message, "scribe stats running") || got.msgIsErr {
+		t.Fatalf("message=%q isErr=%v", got.message, got.msgIsErr)
+	}
+}
+
+func TestScribeCommandRejectsPathOnlyOperationForCurrentBuffer(t *testing.T) {
+	m := initialModel()
+	m.area.SetValue("# Current note")
+
+	got, _ := m.runCommand("scribe related")
+	if !got.msgIsErr || !strings.Contains(got.message, "summarize, tasks, stats") {
+		t.Fatalf("message=%q isErr=%v", got.message, got.msgIsErr)
 	}
 }

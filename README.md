@@ -69,6 +69,9 @@ the terminal forwards that key. Common alternatives such as `Ctrl+Shift+V`,
 | `:search [term]` | Find notes by name **or** contents; results open in the list |
 | `:export [name] [path]` | Write a note to a `.ghostnote.json` file |
 | `:import [path]` | Import a `.ghostnote.json` file |
+| `:scribe summarize` | Analyze the current buffer with GhostScribe and save separate Markdown output |
+| `:scribe tasks` | Extract tasks from the current buffer through GhostScribe |
+| `:scribe stats` | Calculate statistics for the current buffer through GhostScribe |
 | `:wipe` | Clear the editor (alias `:clear`) |
 | `:help` | Show the command summary |
 | `:quit` | Exit (aliases `:q`; also `Ctrl+C` when the terminal does not consume it for copy) |
@@ -113,6 +116,37 @@ TUI **preserves it** on save — it just doesn't render it in the terminal.
 - **ghostnote-cli** — the CLI and local sync daemon
 
 All share the `ghostnote/v1` format and the `~/.ghostnote/notes/` directory.
+
+## GhostScribe integration
+
+Install `ghost-scribe` on `PATH`, or set `GHOSTSCRIBE_BIN` to its absolute
+executable path. The same process adapter is used by command-line and TUI
+entry points; GhostNote does not duplicate GhostScribe's analysis logic.
+
+Path-based CLI usage:
+
+```console
+ghostnote-tui scribe summarize note.md
+ghostnote-tui scribe project notes
+ghostnote-tui scribe tasks note.md
+ghostnote-tui scribe related note.md
+ghostnote-tui scribe stats note.md
+```
+
+If the application is packaged as `ghostnote`, the identical subcommand is
+`ghostnote scribe ...`.
+
+Inside the TUI, `:scribe summarize`, `:scribe tasks`, and `:scribe stats` send
+the current in-memory Markdown to GhostScribe over stdin. Results are written
+as new files below `~/.ghostnote/scribe/`; the source note is not replaced.
+
+The reusable `github.com/drgropp/ghostnote-tui/scribe` Go package exposes
+`RunPath` and `RunText`.
+A future server-side Web handler can call `RunText(request.Context(), ...)` on
+the current note and return the resulting Markdown. Browser code should call
+that authenticated GhostNote handler rather than launch a local process. The
+stable commands, streams, exit codes, and optional JSON envelope are documented
+in GhostScribe's `docs/INTEGRATION.md`.
 
 ## Platform support
 

@@ -446,6 +446,12 @@ func (m model) Update(msg tea.Msg) (tea.Model, tea.Cmd) {
 		}
 		return m, nil
 
+	case scribeResultMsg:
+		if msg.err != nil {
+			return m.flash("scribe failed: "+msg.err.Error(), true)
+		}
+		return m.flash("scribe "+string(msg.operation)+" wrote "+msg.path, false)
+
 	case rgbTickMsg:
 		if !m.rgbOn {
 			return m, nil // stopped; let the loop die
@@ -611,7 +617,7 @@ func (m model) runCommand(val string) (model, tea.Cmd) {
 
 	switch {
 	case lower == "help" || lower == "?":
-		return m.flash("save open notes new wipe rename copy search export import ui reset quit", false)
+		return m.flash("save open notes new wipe rename copy search export import scribe ui reset quit", false)
 	case lower == "quit" || lower == "q" || lower == "exit":
 		m.quitting = true
 		return m, tea.Quit
@@ -651,6 +657,10 @@ func (m model) runCommand(val string) (model, tea.Cmd) {
 		return m.exportNote(fields[1:])
 	case strings.HasPrefix(lower, "import "):
 		return m.importNote(arg)
+	case lower == "scribe":
+		return m.flash("usage: :scribe summarize|tasks|stats", true)
+	case strings.HasPrefix(lower, "scribe "):
+		return m.runScribe(fields[1:])
 	case lower == "reset":
 		return m.resetTheme()
 	case lower == "ui" || lower == "color":
@@ -1083,13 +1093,19 @@ func fmtDate(ts int64) string {
 // ---------- MAIN ----------
 
 func main() {
+	if handled, code := runCLI(os.Args[1:], os.Stdout, os.Stderr); handled {
+		if code != 0 {
+			os.Exit(code)
+		}
+		return
+	}
 	// Do not enable Bubble Tea mouse reporting here. Leaving mouse reporting off
 	// lets the terminal own drag-selection and its normal copy shortcuts.
 	// Bubble Tea enables bracketed paste by default, while the input components
 	// provide a Ctrl+V clipboard fallback when that key reaches the application.
 	p := tea.NewProgram(initialModel(), tea.WithAltScreen())
 	if _, err := p.Run(); err != nil {
-		fmt.Println("error:", err)
+		fmt.Fprintln(os.Stderr, "error:", err)
 		os.Exit(1)
 	}
 }
